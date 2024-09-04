@@ -11,7 +11,7 @@ groups:
       - id: 5.1.1
         text: "Ensure Image Vulnerability Scanning using GCR Container Analysis
         or a third-party provider (Automated)"
-        type: "automated"
+        type: "manual"
         remediation: |
           Using Command Line:
 
@@ -20,7 +20,7 @@ groups:
 
       - id: 5.1.2
         text: "Minimize user access to GCR (Automated)"
-        type: "automated"
+        type: "manual"
         remediation: |
           Using Command Line:
             To change roles at the GCR bucket level:
@@ -103,7 +103,7 @@ groups:
       - id: 5.2.1
         text: "Ensure GKE clusters are not running using the Compute Engine
         default service account (Automated)"
-        type: "automated"
+        type: "manual"
         remediation: |
           Using Command Line:
             Firstly, create a minimally privileged service account:
@@ -166,7 +166,7 @@ groups:
     checks:
       - id: 5.3.1
         text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Automated)"
-        type: "automated"
+        type: "manual"
         remediation: |
           Using Command Line:
             To create a key
