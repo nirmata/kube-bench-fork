@@ -1,6 +1,6 @@
 ---
 controls:
-version: rh-1.0
+version: rh-1.5.0
 id: 3
 text: "Control Plane Configuration"
 type: "controlplane"
@@ -51,12 +51,11 @@ groups:
       - id: 3.2.2
         text: "Ensure that the audit policy covers key security concerns (Manual)"
         audit: |
-          #To verify openshift apiserver audit config
-          oc get configmap config -n openshift-kube-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]?'
-          #To verify kube apiserver audit config
-          oc get configmap config -n openshift-apiserver -ojson | jq -r '.data["config.yaml"]' | jq '.auditConfig.policyConfiguration.rules[]?'
+          #Use the following command to view the audit policies for the Kubernetes API server:
+          oc get configmap -n openshift-kube-apiserver kube-apiserver-audit-policies -o json | jq -r '.data."policy.yaml"'
+          #Use the following command to view the audit policies for the OpenShift API server:
+          oc get configmap -n openshift-apiserver audit -o json | jq -r'.data."policy.yaml"'
         type: manual
         remediation: |
-          In OpenShift 4.6 and higher, if appropriate for your needs,
-          modify the audit policy.
+          Update the audit log policy profile to use WriteRequestBodies.
         scored: false

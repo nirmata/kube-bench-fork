@@ -1,6 +1,6 @@
 ---
 controls:
-version: rh-1.0
+version: rh-1.5.0
 id: 5
 text: "Kubernetes Policies"
 type: "policies"
@@ -28,6 +28,16 @@ groups:
       - id: 5.1.2
         text: "Minimize access to secrets (Manual)"
         type: "manual"
+        audit: |
+          Review the users who have get, list or watch access to secrets objects in the
+          Kubernetes API.
+          Executing the command below will return a list of users and groups who are allowed to
+          get secrets:
+            oc adm policy who-can get secrets
+          The following command returns the users and groups who are allowed to list secrets:
+            oc adm policy who-can list secrets
+          The following command returns the users and groups who are allowed to watch secrets:
+            oc adm policy who-can watch secrets
         remediation: |
           Where possible, remove get, list and watch access to secret objects in the cluster.
         scored: false
@@ -52,6 +62,10 @@ groups:
       - id: 5.1.4
         text: "Minimize access to create pods (Manual)"
         type: "manual"
+        audit: |
+          Review the users who have create access to pod objects in the Kubernetes API with the
+          following command:
+            oc adm policy who-can create pod
         remediation: |
           Where possible, remove create access to pod objects in the cluster.
         scored: false
@@ -59,6 +73,13 @@ groups:
       - id: 5.1.5
         text: "Ensure that default service accounts are not actively used. (Manual)"
         type: "manual"
+        audit: |
+          Every OpenShift project has its own service accounts. Every service account has an
+          associated user name that can be granted roles, just like a regular user. The user name
+          for each service account is derived from its project and the name of the service account.
+          Service accounts are required in each project to run builds, deployments, and other
+          pods. The default service accounts that are automatically created for each project are
+          isolated by the project namespace.
         remediation: |
           None required.
         scored: false
@@ -66,13 +87,21 @@ groups:
       - id: 5.1.6
         text: "Ensure that Service Account Tokens are only mounted where necessary (Manual)"
         type: "manual"
+        audit: |
+          Review pod and service account objects in the cluster and ensure automatically
+          mounting the service account token is disabled (automountServiceAccountToken:
+          false), unless the resource explicitly requires this access.
+          Find all pods that automatically mount service account tokens:
+            oc get pods -A -o json | jq '.items[] | select(.spec.automountServiceAccountToken) | .metadata.name'
+          Find all service accounts that automatically mount service tokens:
+            oc get serviceaccounts -A -o json | jq '.items[] | select(.automountServiceAccountToken) | .metadata.name'
         remediation: |
           Modify the definition of pods and service accounts which do not need to mount service
           account tokens to disable it.
         scored: false
 
   - id: 5.2
-    text: "Pod Security Policies"
+    text: "Security Context Constraints"
     checks:
       - id: 5.2.1
         text: "Minimize the admission of privileged containers (Manual)"
@@ -83,8 +112,8 @@ groups:
           test_items:
             - flag: "false"
         remediation: |
-          Create a SCC as described in the OpenShift documentation, ensuring that the Allow
-          Privileged field is set to false.
+          Create an SCC that sets allowPrivilegedContainer to false and take it into use by
+          assigning it to applicable users and groups.
         scored: false
 
       - id: 5.2.2
@@ -95,8 +124,8 @@ groups:
           test_items:
             - flag: "false"
         remediation: |
-          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
-          PID field is set to false.
+          Create an SCC that sets allowHostPID to false and take it into use by assigning it to
+          applicable users and groups.
         scored: false
 
       - id: 5.2.3
@@ -107,8 +136,8 @@ groups:
           test_items:
             - flag: "false"
         remediation: |
-          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
-          IPC field is set to false.
+          Create a SCC that sets allowHostIPC to false and take it into use by assigning it to
+          applicable users and groups.
         scored: false
 
       - id: 5.2.4
@@ -119,8 +148,8 @@ groups:
           test_items:
             - flag: "false"
         remediation: |
-          Create a SCC as described in the OpenShift documentation, ensuring that the Allow Host
-          Network field is omitted or set to false.
+          Create an SCC that sets allowHostNetwork to false and take it into use by assigning it
+          to applicable users and groups.
         scored: false
 
       - id: 5.2.5
@@ -131,8 +160,8 @@ groups:
           test_items:
             - flag: "false"
         remediation: |
-          Create a SCC as described in the OpenShift documentation, ensuring that the Allow
-          Privilege Escalation field is omitted or set to false.
+          Create an SCC that sets allowPrivilegeEscalation to false and take it into use by
+          assigning it to applicable users and groups.
         scored: false
 
       - id: 5.2.6
@@ -151,8 +180,8 @@ groups:
                 op: nothave
                 value: 0
         remediation: |
-          None required. By default, OpenShift includes the non-root SCC with the the Run As User
-          Strategy is set to either MustRunAsNonRoot. If additional SCCs are appropriate, follow the
+          None required. By default, OpenShift includes the nonroot and nonroot-v2 SCCs that
+          restrict the ability to run as nonroot. If additional SCCs are appropriate, follow the
           OpenShift documentation to create custom SCCs.
         scored: false
 
@@ -167,25 +196,63 @@ groups:
             - flag: "ALL"
             - flag: "NET_RAW"
         remediation: |
-          Create a SCC as described in the OpenShift documentation, ensuring that the Required
-          Drop Capabilities is set to include either NET_RAW or ALL.
+          Create an SCC that sets requiredDropCapabilities to include ALL or at least NET_RAW
+          and take it into use by assigning it to applicable users and groups.
         scored: false
 
       - id: 5.2.8
         text: "Minimize the admission of containers with added capabilities (Manual)"
         type: "manual"
+        audit: |
+          Use the following command to list all SCCs that prohibit users from defining container
+          capabilities:
+          oc get scc -A -o json | jq '.items[] | select(.allowedCapabilities==null) |
+          .metadata.name'
+          Verify at least one SCC is returned.
+          Additionally, use the following command to list all SCCs that do not set default container
+          capabilities:
+          oc get scc -A -o json | jq '.items[] | select(.defaultAddCapabilities==null)
+          | .metadata.name'
+          Verify at least one SCC is returned.
         remediation: |
-          Ensure that Allowed Capabilities is set to an empty array for every SCC in the cluster
-          except for the privileged SCC.
+          Utilize the restricted-v2 SCC or create an SCC that sets allowedCapabilities and
+          defaultAddCapabilities to an empty list and take it into use by assigning it to
+          applicable users and groups.
         scored: false
 
       - id: 5.2.9
         text: "Minimize the admission of containers with capabilities assigned (Manual)"
         type: "manual"
+        audit: |
+          Use the following command to list SCCs that drop all capabilities from containers:
+          oc get scc -A -o json | jq '.items[] |
+          select(.requiredDropCapabilities[]?|any(. == "ALL"; .)) | .metadata.name'
+          Verify at least one SCC is returned.
         remediation: |
           Review the use of capabilites in applications running on your cluster. Where a namespace
           contains applicaions which do not require any Linux capabities to operate consider
           adding a SCC which forbids the admission of containers which do not drop all capabilities.
+        scored: false
+
+      - id: 5.2.10
+        text: "Minimize access to privileged Security Context Constraints (Manual)"
+        type: "manual"
+        audit: |
+          Find all users and groups with access to SCCs that include privileged or elevated capabilities:
+          oc get scc -ojson | jq '.items[]|select(.allowHostIPC or .allowHostPID or
+          .allowHostPorts or .allowHostNetwork or .allowHostDirVolumePlugin or
+          .allowPrivilegedContainer or .runAsUser.type != "MustRunAsRange"
+          )|.metadata.name,{"Group:":.groups},{"User":.users}'
+          Review the returned users and groups and verify they actually need access to those
+          SCCs.
+        remediation: |
+          Remove any users and groups who do not need access to an SCC, following the
+          principle of least privilege.
+          You can remove users and groups from an SCC using the oc edit scc $NAME
+          command.
+          Additionally, you can create your own SCCs that contain the container functionality you
+          need for a particular use case and assign that SCC to users and groups if the default
+          SCCs are not appropriate for your use case.
         scored: false
 
   - id: 5.3
@@ -235,8 +302,15 @@ groups:
     text: "Extensible Admission Control"
     checks:
       - id: 5.5.1
-        text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Manual)"
+        text: "Configure Image Provenance using image controller configuration parameters (Manual)"
         type: "manual"
+        audit: |
+          Review the image controller parameters in your cluster and verify that image
+          provenance is configured as appropriate.
+          Run the following command to return all registry sources:
+          oc get image.config.openshift.io/cluster -o json | jq .spec.registrySources
+          If nothing is returned, this is a finding and you should refer to the OpenShift image guide
+          for configuring trusted registries.
         remediation: |
           Follow the OpenShift documentation: [Image configuration resources](https://docs.openshift.com/container-platform/4.5/openshift_images/image-configuration.html
         scored: false
@@ -260,8 +334,10 @@ groups:
         text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Manual)"
         type: "manual"
         remediation: |
-          To enable the default seccomp profile, use the reserved value /runtime/default that will
-          make sure that the pod uses the default policy available on the host.
+          For any non-privileged pods or containers that do not have seccomp profiles, consider
+          using the RuntimeDefault or creating a custom seccomp profile specifically for the
+          workload.
+          Please refer to the OpenShift documentation for working with custom seccomp profiles.
         scored: false
 
       - id: 5.7.3
