@@ -10,7 +10,6 @@ groups:
     checks:
       - id: 5.1.1
         text: "Ensure Image Vulnerability Scanning using Azure Defender image scanning or a third party provider (Automated)"
-        type: "manual"
         remediation: "Enable Azure Defender for Container Registries: If you find that Azure Defender for
         container registries is not enabled and you wish to enable it, you can do so using the
         following command:
@@ -96,7 +95,6 @@ groups:
     checks:
       - id: 5.4.1
         text: "Restrict Access to the Control Plane Endpoint (Automated)"
-        type: "manual"
         remediation: "By enabling private endpoint access to the Kubernetes API server, all communication
         between your nodes and the API server stays within your VPC. You can also limit the IP
         addresses that can access your API server from the internet, or completely disable
@@ -121,7 +119,6 @@ groups:
 
       - id: 5.4.3
         text: "Ensure clusters are created with Private Nodes (Automated)"
-        type: "manual"
         remediation: "az aks create \
         --resource-group [PRIVATE_CLUSTER_RESOURCE_GROUP] \
         --name [PRIVATE_CLUSTER_NAME] \
@@ -137,7 +134,6 @@ groups:
 
       - id: 5.4.4
         text: "Ensure Network Policy is Enabled and set as appropriate (Automated)"
-        type: "manual"
         remediation: "Utilize Calico or other network policy engine to segment and isolate your traffic."
         scored: false
 

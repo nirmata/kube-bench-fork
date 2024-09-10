@@ -10,7 +10,6 @@ groups:
     checks:
       - id: 4.1.1
         text: "Ensure that the cluster-admin role is only used where required (Automated)"
-        type: "manual"
         remediation: |
           Identify all clusterrolebindings to the cluster-admin role. Check if they are used and
           if they need this role or if they could use a role with fewer privileges.
@@ -21,14 +20,12 @@ groups:
 
       - id: 4.1.2
         text: "Minimize access to secrets (Automated)"
-        type: "manual"
         remediation: |
           Where possible, remove get, list and watch access to secret objects in the cluster.
         scored: false
 
       - id: 4.1.3
         text: "Minimize wildcard use in Roles and ClusterRoles (Automated)"
-        type: "manual"
         remediation: |
           Where possible replace any use of wildcards in clusterroles and roles with specific
           objects or actions.
@@ -36,7 +33,6 @@ groups:
 
       - id: 4.1.4
         text: "Ensure that default service accounts are not actively used. (Automated)"
-        type: "manual"
         remediation: |
           Create explicit service accounts wherever a Kubernetes workload requires specific access
           to the Kubernetes API server.
@@ -46,7 +42,6 @@ groups:
 
       - id: 4.1.5
         text: "Ensure that Service Account Tokens are only mounted where necessary (Automated)"
-        type: "manual"
         remediation: |
           Modify the definition of pods and service accounts which do not need to mount service
           account tokens to disable it.
@@ -54,21 +49,18 @@ groups:
 
       - id: 4.1.6
         text: "Avoid use of system:masters group (Automated)"
-        type: "manual"
         remediation: |
           Remove the system:masters group from all users in the cluster.
         scored: false
 
       - id: 4.1.7
         text: "Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes cluster (Manual)"
-        type: "manual"
         remediation: |
           Where possible, remove the impersonate, bind and escalate rights from subjects.
         scored: false
 
       - id: 4.1.8
         text: "Avoid bindings to system:anonymous (Automated)"
-        type: "manual"
         remediation: |
           Identify all clusterrolebindings and rolebindings to the user system:anonymous.Strongly consider replacing unsafe bindings with an authenticated, user-defined group.
           Where possible, bind to non-default, user-defined groups with least-privilege roles.
@@ -79,7 +71,6 @@ groups:
 
       - id: 4.1.9
         text: "Avoid non-default bindings to system:unauthenticated (Automated)"
-        type: "manual"
         remediation: |
           Identify all non-default clusterrolebindings and rolebindings to the group
           system:unauthenticated.Strongly consider replacing non-default, unsafe bindings with an authenticated, user-
@@ -91,7 +82,6 @@ groups:
 
       - id: 4.1.10
         text: "Avoid non-default bindings to system:authenticated (Automated)"
-        type: "manual"
         remediation: |
           Identify all non-default clusterrolebindings and rolebindings to the group system:authenticated.Strongly consider replacing non-default, unsafe bindings with an authenticated, user-
           defined group. Strongly consider replacing non-default, unsafe bindings with an authenticated, user-defined group. Where possible, bind to non-default, user-defined groups with least-
@@ -105,7 +95,6 @@ groups:
     checks:
       - id: 4.2.1
         text: "Ensure that the cluster enforces Pod Security Standard Baseline profile or stricter for all namespaces. (Manual)"
-        type: "manual"
         remediation: |
           Ensure that Pod Security Admission is in place for every namespace which contains
           user workloads. Run the following command to enforce the Baseline profile in a namespace:
@@ -117,7 +106,6 @@ groups:
     checks:
       - id: 4.3.1
         text: "Ensure that the CNI in use supports Network Policies (Manual)"
-        type: "manual"
         remediation: |
           To use a CNI plugin with Network Policy, enable Network Policy in GKE, and the CNI plugin
           will be updated. See Recommendation 5.6.7.
@@ -125,7 +113,6 @@ groups:
 
       - id: 4.3.2
         text: "Ensure that all Namespaces have Network Policies defined (Automated)"
-        type: "manual"
         remediation: |
           Follow the documentation and create NetworkPolicy objects as you need them.
         scored: false
@@ -135,7 +122,6 @@ groups:
     checks:
       - id: 4.4.1
         text: "Prefer using secrets as files over secrets as environment variables (Automated)"
-        type: "manual"
         remediation: |
           if possible, rewrite application code to read secrets from mounted secret files, rather than
           from environment variables.
@@ -143,7 +129,6 @@ groups:
 
       - id: 4.4.2
         text: "Consider external secret storage (Automated)"
-        type: "manual"
         remediation: |
           Refer to the secrets management options offered by your cloud provider or a third-party
           secrets management solution.
@@ -154,7 +139,7 @@ groups:
     checks:
       - id: 4.5.1
         text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Automated)"
-        type: "manual"
+        
         remediation: |
           Follow the Kubernetes documentation and setup image provenance.
           See also Recommendation 6.10.5 for GKE specifically.
@@ -165,7 +150,7 @@ groups:
     checks:
       - id: 4.6.1
         text: "Create administrative boundaries between resources using namespaces (Automated)"
-        type: "manual"
+        
         remediation: |
           Follow the documentation and create namespaces for objects in your deployment as you need
           them.
@@ -173,7 +158,6 @@ groups:
 
       - id: 4.6.2
         text: "Ensure that the seccomp profile is set to docker/default in your pod definitions (Automated)"
-        type: "manual"
         remediation: |
           Seccomp is an alpha feature currently. By default, all alpha features are disabled. So, you
           would need to enable alpha features in the apiserver by passing "--feature-
@@ -199,7 +183,6 @@ groups:
 
       - id: 4.6.3
         text: "Apply Security Context to Your Pods and Containers (Automated)"
-        type: "manual"
         remediation: |
           Follow the Kubernetes documentation and apply security contexts to your pods. For a
           suggested list of security contexts, you may refer to the CIS Security Benchmark for Docker
@@ -208,7 +191,6 @@ groups:
 
       - id: 4.6.4
         text: "The default namespace should not be used (Automated)"
-        type: "manual"
         remediation: |
           Ensure that namespaces are created to allow for appropriate segregation of Kubernetes
           resources and that all new resources are created in a specific namespace.

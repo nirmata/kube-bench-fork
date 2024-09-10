@@ -1,0 +1,161 @@
+---
+controls:
+version: "oke-1.5.0"
+id: 5
+text: "Managed Services"
+type: "managedservices"
+groups:
+  - id: 5.1
+    text: "Image Registry and Image Scanning"
+    checks:
+      - id: 5.1.1
+        text: "Oracle Cloud Security Penetration and Vulnerability Testing (Manual)"
+        remediation: |
+          As a service administrator, you can run tests for some Oracle Cloud services. Before
+          running the tests, you must first review the Oracle Cloud Testing Policies section.
+          Note:
+          You must have an Oracle Account with the necessary privileges to file service
+          maintenance requests, and you must be signed in to the environment that will be the
+          subject of the penetration and vulnerability testing.
+        scored: false
+
+      - id: 5.1.2
+        text: "Minimize user access control to Container Engine for Kubernetes (Manual)"
+        remediation: |
+          By default, users are not assigned any Kubernetes RBAC roles (or clusterroles) by
+          default. So before attempting to create a new role (or clusterrole), you must be assigned
+          an appropriately privileged role (or clusterrole). A number of such roles and clusterroles
+          are always created by default, including the cluster-admin clusterrole (for a full list, see
+          Default Roles and Role Bindings in the Kubernetes documentation). The cluster-admin
+          clusterrole essentially confers super-user privileges. A user granted the cluster-admin
+          clusterrole can perform any operation across all namespaces in a given cluster.
+          Note that Oracle Cloud Infrastructure tenancy administrators already have sufficient
+          privileges, and do not require the cluster-admin clusterrole.
+        scored: false
+
+      - id: 5.1.3
+        text: "Minimize cluster access to read-only (Manual)"
+        remediation: |
+          To access a cluster using kubectl, you have to set up a Kubernetes configuration file
+          (commonly known as a 'kubeconfig' file) for the cluster. The kubeconfig file (by default
+          named config and stored in the $HOME/.kube directory) provides the necessary details
+          to access the cluster. Having set up the kubeconfig file, you can start using kubectl to
+          manage the cluster.
+          The steps to follow when setting up the kubeconfig file depend on how you want to
+          access the cluster:
+            • To access the cluster using kubectl in Cloud Shell, run an Oracle Cloud
+            Infrastructure CLI command in the Cloud Shell window to set up the kubeconfig
+            file.
+            • To access the cluster using a local installation of kubectl:
+                1. Generate an API signing key pair (if you don't already have one).
+                2. Upload the public key of the API signing key pair.
+                3. Install and configure the Oracle Cloud Infrastructure CLI.
+                4. Set up the kubeconfig file.
+        scored: false
+
+      - id: 5.1.4
+        text: "Minimize Container Registries to only those approved (Manual)"
+        remediation: |
+          None
+        scored: false
+
+  - id: 5.2
+    text: "Identity and Access Management (IAM)"
+    checks:
+      - id: 5.2.1
+        text: "Prefer using dedicated Service Accounts (Automated)"
+        remediation: |
+          When you create a pod, if you do not specify a service account, it is automatically
+          assigned the default service account in the same namespace. If you get the raw json or
+          yaml for a pod you have created (for example, kubectl get pods/<podname> -o
+          yaml), you can see the spec.serviceAccountName field has been automatically set.
+        scored: false
+
+  - id: 5.3
+    text: "Cloud Key Management Service (Cloud KMS)"
+    checks:
+      - id: 5.3.1
+        text: "Encrypting Kubernetes Secrets at Rest in Etcd (Manual)"
+        remediation: |
+          You can create a cluster in one tenancy that uses a master encryption key in a different
+          tenancy. In this case, you have to write cross-tenancy policies to enable the cluster in its
+          tenancy to access the master encryption key in the Vault service's tenancy. Note that if
+          you want to create a cluster and specify a master encryption key that's in a different
+          tenancy, you cannot use the Console to create the cluster.
+          For example, assume the cluster is in the ClusterTenancy, and the master encryption
+          key is in the KeyTenancy. Users belonging to a group (OKEAdminGroup) in the
+          ClusterTenancy have permissions to create clusters. A dynamic group
+          (OKEAdminDynGroup) has been created in the cluster, with the rule ALL
+          {resource.type = 'cluster', resource.compartment.id =
+          'ocid1.compartment.oc1..<unique_ID>'}, so all clusters created in the
+          ClusterTenancy belong to the dynamic group.
+        scored: false
+
+  - id: 5.4
+    text: "Node Metadata"
+    checks:
+      - id: 5.4.1
+        text: "Restrict Access to the Control Plane Endpoint (Automated)"
+        remediation: |
+          None
+        scored: false
+
+      - id: 5.4.2
+        text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Automated)"
+        remediation: |
+          None
+        scored: false
+
+      - id: 5.4.3
+        text: "Ensure clusters are created with Private Nodes (Automated)"
+        remediation: |
+          None
+        scored: false
+
+      - id: 5.4.4
+        text: "Ensure Network Policy is Enabled and set as appropriate (Automated)"
+        remediation: |
+          None
+        scored: false
+
+      - id: 5.4.5
+        text: "Encrypt traffic to HTTPS load balancers with TLS certificates (Manual)"
+        audit: |
+          Your load balancer vendor can provide details on auditing the certificates and policies
+          required to utilize TLS.
+        remediation: |
+          Your load balancer vendor can provide details on configuring HTTPS with TLS.
+        scored: false
+
+  - id: 5.5
+    text: "Authentication and Authorization"
+    checks:
+      - id: 5.5.1
+        text: "Access Control and Container Engine for Kubernetes (Manual)"
+        audit: |
+          By default, users are not assigned any Kubernetes RBAC roles (or clusterroles) by
+          default. So before attempting to create a new role (or clusterrole), you must be assigned
+          an appropriately privileged role (or clusterrole). A number of such roles and clusterroles
+          are always created by default, including the cluster-admin clusterrole (for a full list, see
+          Default Roles and Role Bindings in the Kubernetes documentation). The cluster-admin
+          clusterrole essentially confers super-user privileges. A user granted the cluster-admin
+          clusterrole can perform any operation across all namespaces in a given cluster.
+        remediation: |
+          Granting the Kubernetes RBAC cluster-admin clusterrole
+          Follow these steps to grant a user who is not a tenancy administrator the Kubernetes
+          RBAC cluster-admin clusterrole on a cluster deployed on Oracle Cloud Infrastructure:
+            1. If you haven't already done so, follow the steps to set up the cluster's kubeconfig
+            configuration file and (if necessary) set the KUBECONFIG environment variable
+            to point to the file. Note that you must set up your own kubeconfig file. You
+            cannot access a cluster using a kubeconfig file that a different user set up. See
+            Setting Up Cluster Access.
+            2. In a terminal window, grant the Kubernetes RBAC cluster-admin clusterrole to
+               the user by entering:
+            $ kubectl create clusterrolebinding <my-cluster-admin-binding> --
+            clusterrole=cluster-admin --user=<user_OCID>
+            where:
+              • is a string of your choice to be used as the name for the binding between the
+              user and the Kubernetes RBAC cluster-admin clusterrole. For example,
+              jdoe_clst_adm
+              • <user_OCID> is the user's OCID (obtained from the Console
+        scored: false
