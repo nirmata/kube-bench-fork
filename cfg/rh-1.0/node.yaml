@@ -10,6 +10,7 @@ groups:
     checks:
       - id: 4.1.1
         text: "Ensure that the kubelet service file permissions are set to 644 or more restrictive (Automated)"
+        type: "automated"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /etc/systemd/system/kubelet.service 2> /dev/null
@@ -25,6 +26,7 @@ groups:
 
       - id: 4.1.2
         text: "Ensure that the kubelet service file ownership is set to root:root (Automated)"
+        type: "automated"
         audit: |
           # Should return root:root for each node
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
@@ -117,6 +119,7 @@ groups:
 
       - id: 4.1.7
         text: "Ensure that the certificate authorities file permissions are set to 644 or more restrictive (Automated)"
+        type: "automated"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /etc/kubernetes/kubelet-ca.crt 2> /dev/null
@@ -133,6 +136,7 @@ groups:
 
       - id: 4.1.8
         text: "Ensure that the client certificate authorities file ownership is set to root:root (Automated)"
+        type: "automated"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /etc/kubernetes/kubelet-ca.crt 2> /dev/null
@@ -146,6 +150,7 @@ groups:
 
       - id: 4.1.9
         text: "Ensure that the kubelet --config configuration file has permissions set to 600 or more restrictive (Automated)"
+        type: "automated"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n permissions=%a" /var/lib/kubelet/kubeconfig 2> /dev/null
@@ -162,6 +167,7 @@ groups:
 
       - id: 4.1.10
         text: "Ensure that the kubelet configuration file ownership is set to root:root (Automated)"
+        type: "automated"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc debug node/$NODE_NAME -- chroot /host stat -c "$NODE_NAME %n %U:%G" /var/lib/kubelet/kubeconfig 2> /dev/null
@@ -204,6 +210,7 @@ groups:
 
       - id: 4.2.2
         text: "Ensure that the --anonymous-auth argument is set to false (Automated)"
+        type: "automated"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc debug node/$NODE_NAME -- chroot /host grep -B4 -A1 anonymous /etc/kubernetes/kubelet.conf 2> /dev/null
@@ -238,6 +245,7 @@ groups:
 
       - id: 4.2.4
         text: "Ensure that the --client-ca-file argument is set as appropriate (Automated)"
+        type: "automated"
         audit: |
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
           oc debug node/$NODE_NAME -- chroot /host grep clientCAFile /etc/kubernetes/kubelet.conf 2> /dev/null
@@ -251,6 +259,7 @@ groups:
 
       - id: 4.2.5
         text: "Verify that the read only port is not used or is set to 0 (Automated)"
+        type: "automated"
         audit: |
           echo `oc -n openshift-kube-apiserver get cm kube-apiserver-pod -o yaml | grep --color read-only-port` 2> /dev/null
           echo `oc -n openshift-kube-apiserver get cm config -o yaml | grep --color "read-only-port"` 2> /dev/null
@@ -273,6 +282,7 @@ groups:
 
       - id: 4.2.6
         text: "Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Automated)"
+        type: "automated"
         audit: |
           # Should return 1 for node
           NODE_NAME=$(oc get pod $HOSTNAME -o=jsonpath='{.spec.nodeName}')
@@ -345,6 +355,7 @@ groups:
 
       - id: 4.2.9
         text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
+        type: "manual"
         audit: |
           oc get configmap config -n openshift-kube-apiserver -o json \
             | jq -r '.data["config.yaml"]' \
