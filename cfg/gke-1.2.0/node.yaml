@@ -1,6 +1,6 @@
 ---
 controls:
-version: "gke-1.6.0"
+version: "gke-1.2.0"
 id: 3
 text: "Worker Node Security Configuration"
 type: "node"
@@ -9,7 +9,7 @@ groups:
     text: "Worker Node Configuration Files"
     checks:
       - id: 3.1.1
-        text: "Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Automated)"
+        text: "Ensure that the proxy kubeconfig file permissions are set to 644 or more restrictive (Manual)"
         audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c permissions=%a $proxykubeconfig; fi'' '
         tests:
           test_items:
@@ -24,7 +24,7 @@ groups:
         scored: false
 
       - id: 3.1.2
-        text: "Ensure that the proxy kubeconfig file ownership is set to root:root (Automated)"
+        text: "Ensure that the proxy kubeconfig file ownership is set to root:root (Manual)"
         audit: '/bin/sh -c ''if test -e $proxykubeconfig; then stat -c %U:%G $proxykubeconfig; fi'' '
         tests:
           test_items:
@@ -35,7 +35,7 @@ groups:
         scored: false
 
       - id: 3.1.3
-        text: "Ensure that the kubelet configuration file permissions has permissions set to 600 (Automated)"
+        text: "Ensure that the kubelet configuration file permissions are set to 644 or more restrictive (Manual)"
         audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c permissions=%a $kubeletconf; fi'' '
         tests:
           test_items:
@@ -49,7 +49,7 @@ groups:
         scored: false
 
       - id: 3.1.4
-        text: "Ensure that the kubelet configuration file ownership is set to root:root (Automated)"
+        text: "Ensure that the kubelet configuration file ownership is set to root:root (Manual)"
         audit: '/bin/sh -c ''if test -e $kubeletconf; then stat -c %U:%G $kubeletconf; fi'' '
         tests:
           test_items:
@@ -83,7 +83,6 @@ groups:
           Based on your system, restart the kubelet service. For example:
           systemctl daemon-reload
           systemctl restart kubelet.service
-          systemctl status kubelet -l
         scored: true
 
       - id: 3.2.2
@@ -130,7 +129,7 @@ groups:
         scored: true
 
       - id: 3.2.4
-        text: "Ensure that the --read-only-port argument is set to 0 (Automated)"
+        text: "Ensure that the --read-only-port argument is set to 0 (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -179,6 +178,28 @@ groups:
         scored: true
 
       - id: 3.2.6
+        text: "Ensure that the --protect-kernel-defaults argument is set to true (Manual)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: --protect-kernel-defaults
+              path: '{.protectKernelDefaults}'
+              set: true
+              compare:
+                op: eq
+                value: true
+        remediation: |
+          If using a Kubelet config file, edit the file to set protectKernelDefaults: true.
+          If using command line arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+          on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable.
+          --protect-kernel-defaults=true
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: true
+
+      - id: 3.2.7
         text: "Ensure that the --make-iptables-util-chains argument is set to true (Automated) "
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
@@ -204,7 +225,23 @@ groups:
           systemctl restart kubelet.service
         scored: true
 
-      - id: 3.2.7
+      - id: 3.2.8
+        text: "Ensure that the --hostname-override argument is not set (Manual)"
+        audit: "/bin/ps -fC $kubeletbin "
+        tests:
+          test_items:
+            - flag: --hostname-override
+              set: false
+        remediation: |
+          Edit the kubelet service file $kubeletsvc
+          on each worker node and remove the --hostname-override argument from the
+          KUBELET_SYSTEM_PODS_ARGS variable.
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: false
+
+      - id: 3.2.9
         text: "Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
@@ -225,8 +262,32 @@ groups:
           systemctl restart kubelet.service
         scored: true
 
-      - id: 3.2.8
-        text: "Ensure that the --rotate-certificates argument is not set to false (Automated)"
+      - id: 3.2.10
+        text: "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)"
+        audit: "/bin/ps -fC $kubeletbin"
+        audit_config: "/bin/cat $kubeletconf"
+        tests:
+          test_items:
+            - flag: --tls-cert-file
+              path: '{.tlsCertFile}'
+            - flag: --tls-private-key-file
+              path: '{.tlsPrivateKeyFile}'
+        remediation: |
+          If using a Kubelet config file, edit the file to set tlsCertFile to the location
+          of the certificate file to use to identify this Kubelet, and tlsPrivateKeyFile
+          to the location of the corresponding private key file.
+          If using command line arguments, edit the kubelet service file
+          $kubeletsvc on each worker node and
+          set the below parameters in KUBELET_CERTIFICATE_ARGS variable.
+          --tls-cert-file=<path/to/tls-certificate-file>
+          --tls-private-key-file=<path/to/tls-key-file>
+          Based on your system, restart the kubelet service. For example:
+          systemctl daemon-reload
+          systemctl restart kubelet.service
+        scored: false
+
+      - id: 3.2.11
+        text: "Ensure that the --rotate-certificates argument is not set to false (Manual)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"
         tests:
@@ -252,7 +313,7 @@ groups:
           systemctl restart kubelet.service
         scored: false
 
-      - id: 3.2.9
+      - id: 3.2.12
         text: "Ensure that the RotateKubeletServerCertificate argument is set to true (Automated)"
         audit: "/bin/ps -fC $kubeletbin"
         audit_config: "/bin/cat $kubeletconf"

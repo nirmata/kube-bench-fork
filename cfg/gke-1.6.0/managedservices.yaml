@@ -1,6 +1,6 @@
 ---
 controls:
-version: "gke-1.2.0"
+version: "gke-1.6.0"
 id: 5
 text: "Managed Services"
 type: "managedservices"
@@ -10,8 +10,7 @@ groups:
     checks:
       - id: 5.1.1
         text: "Ensure Image Vulnerability Scanning using GCR Container Analysis
-        or a third-party provider (Manual)"
-        type: "manual"
+        or a third-party provider (Automated)"
         remediation: |
           Using Command Line:
 
@@ -19,8 +18,7 @@ groups:
         scored: false
 
       - id: 5.1.2
-        text: "Minimize user access to GCR (Manual)"
-        type: "manual"
+        text: "Minimize user access to GCR (Automated)"
         remediation: |
           Using Command Line:
             To change roles at the GCR bucket level:
@@ -51,7 +49,6 @@ groups:
 
       - id: 5.1.3
         text: "Minimize cluster access to read-only for GCR (Manual)"
-        type: "manual"
         remediation: |
           Using Command Line:
             For an account explicitly granted to the bucket. First, add read access to the Kubernetes
@@ -82,7 +79,6 @@ groups:
 
       - id: 5.1.4
         text: "Minimize Container Registries to only those approved (Manual)"
-        type: "manual"
         remediation: |
           Using Command Line:
             First, update the cluster to enable Binary Authorization:
@@ -102,8 +98,7 @@ groups:
     checks:
       - id: 5.2.1
         text: "Ensure GKE clusters are not running using the Compute Engine
-        default service account (Manual)"
-        type: "manual"
+        default service account (Automated)"
         remediation: |
           Using Command Line:
             Firstly, create a minimally privileged service account:
@@ -139,11 +134,10 @@ groups:
 
       - id: 5.2.2
         text: "Prefer using dedicated GCP Service Accounts and Workload Identity (Manual)"
-        type: "manual"
         remediation: |
           Using Command Line:
 
-              gcloud beta container clusters update [CLUSTER_NAME] --zone [CLUSTER_ZONE] \
+              gcloud container clusters update [CLUSTER_NAME] --zone [CLUSTER_ZONE] \
                 --identity-namespace=[PROJECT_ID].svc.id.goog
 
             Note that existing Node pools are unaffected. New Node pools default to --workload-
@@ -151,7 +145,7 @@ groups:
 
             Then, modify existing Node pools to enable GKE_METADATA_SERVER:
 
-              gcloud beta container node-pools update [NODEPOOL_NAME] \
+              gcloud container node-pools update [NODEPOOL_NAME] \
                 --cluster=[CLUSTER_NAME] --zone [CLUSTER_ZONE] \
                 --workload-metadata-from-node=GKE_METADATA_SERVER
 
@@ -165,8 +159,7 @@ groups:
     text: "Cloud Key Management Service (Cloud KMS)"
     checks:
       - id: 5.3.1
-        text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Manual)"
-        type: "manual"
+        text: "Ensure Kubernetes Secrets are encrypted using keys managed in Cloud KMS (Automated)"
         remediation: |
           Using Command Line:
             To create a key
@@ -215,35 +208,17 @@ groups:
     text: "Node Metadata"
     checks:
       - id: 5.4.1
-        text: "Ensure legacy Compute Engine instance metadata APIs are Disabled (Automated)"
-        type: "manual"
-        remediation: |
-          Using Command Line:
-            To update an existing cluster, create a new Node pool with the legacy GCE metadata
-            endpoint disabled:
-
-              gcloud container node-pools create [POOL_NAME] \
-                --metadata disable-legacy-endpoints=true \
-                --cluster [CLUSTER_NAME] \
-                --zone [COMPUTE_ZONE]
-
-            You will need to migrate workloads from any existing non-conforming Node pools, to the
-            new Node pool, then delete non-conforming Node pools to complete the remediation.
-        scored: false
-
-      - id: 5.4.2
         text: "Ensure the GKE Metadata Server is Enabled (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
-              gcloud beta container clusters update [CLUSTER_NAME] \
+              gcloud container clusters update [CLUSTER_NAME] \
                 --identity-namespace=[PROJECT_ID].svc.id.goog
             Note that existing Node pools are unaffected. New Node pools default to --workload-
             metadata-from-node=GKE_METADATA_SERVER .
 
             To modify an existing Node pool to enable GKE Metadata Server:
 
-              gcloud beta container node-pools update [NODEPOOL_NAME] \
+              gcloud container node-pools update [NODEPOOL_NAME] \
                 --cluster=[CLUSTER_NAME] \
                 --workload-metadata-from-node=GKE_METADATA_SERVER
 
@@ -257,7 +232,6 @@ groups:
     checks:
       - id: 5.5.1
         text: "Ensure Container-Optimized OS (COS) is used for GKE node images (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To set the node image to cos for an existing cluster's Node pool:
@@ -269,7 +243,6 @@ groups:
 
       - id: 5.5.2
         text: "Ensure Node Auto-Repair is enabled for GKE nodes (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To enable node auto-repair for an existing cluster with Node pool, run the following
@@ -282,7 +255,6 @@ groups:
 
       - id: 5.5.3
         text: "Ensure Node Auto-Upgrade is enabled for GKE nodes (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To enable node auto-upgrade for an existing cluster's Node pool, run the following
@@ -294,13 +266,12 @@ groups:
         scored: false
 
       - id: 5.5.4
-        text: "Automate GKE version management using Release Channels (Manual)"
-        type: "manual"
+        text: "Automate GKE version management using Release Channels (Automated)"
         remediation: |
           Using Command Line:
             Create a new cluster by running the following command:
 
-              gcloud beta container clusters create [CLUSTER_NAME] \
+              gcloud container clusters create [CLUSTER_NAME] \
                 --zone [COMPUTE_ZONE] \
                 --release-channel [RELEASE_CHANNEL]
 
@@ -308,24 +279,19 @@ groups:
         scored: false
 
       - id: 5.5.5
-        text: "Ensure Shielded GKE Nodes are Enabled (Manual)"
-        type: "manual"
+        text: "Ensure Shielded GKE Nodes are Enabled (Automated)"
         remediation: |
           Using Command Line:
-            To create a Node pool within the cluster with Integrity Monitoring enabled, run the
-            following command:
+            To migrate an existing cluster, the flag --enable-shielded-nodes needs to be
+          specified in the cluster update command:
 
-              gcloud beta container node-pools create [NODEPOOL_NAME] \
-                --cluster [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
-                --shielded-integrity-monitoring
-
-            You will also need to migrate workloads from existing non-conforming Node pools to the
-            newly created Node pool, then delete the non-conforming pools.
+              gcloud container clusters update [CLUSTER_NAME] \
+                --zone [CLUSTER_ZONE] \
+                --enable-shielded-nodes
         scored: false
 
       - id: 5.5.6
         text: "Ensure Integrity Monitoring for Shielded GKE Nodes is Enabled (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To create a Node pool within the cluster with Integrity Monitoring enabled, run the
@@ -341,13 +307,12 @@ groups:
 
       - id: 5.5.7
         text: "Ensure Secure Boot for Shielded GKE Nodes is Enabled (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To create a Node pool within the cluster with Secure Boot enabled, run the following
             command:
 
-              gcloud beta container node-pools create [NODEPOOL_NAME] \
+              gcloud container node-pools create [NODEPOOL_NAME] \
                 --cluster [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
                 --shielded-secure-boot
 
@@ -360,7 +325,6 @@ groups:
     checks:
       - id: 5.6.1
         text: "Enable VPC Flow Logs and Intranode Visibility (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To enable intranode visibility on an existing cluster, run the following command:
@@ -371,7 +335,6 @@ groups:
 
       - id: 5.6.2
         text: "Ensure use of VPC-native clusters (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To enable Alias IP on a new cluster, run the following command:
@@ -382,8 +345,7 @@ groups:
         scored: false
 
       - id: 5.6.3
-        text: "Ensure Master Authorized Networks is Enabled (Manual)"
-        type: "manual"
+        text: "Ensure Control Plane Authorized Networks is Enabled (Manual)"
         remediation: |
           Using Command Line:
             To check Master Authorized Networks status for an existing cluster, run the following
@@ -391,7 +353,7 @@ groups:
 
               gcloud container clusters describe [CLUSTER_NAME] \
                 --zone [COMPUTE_ZONE] \
-                --format json | jq '.masterAuthorizedNetworksConfig'
+                --enable -master-authorized-networks
 
             The output should return
 
@@ -399,15 +361,14 @@ groups:
                 "enabled": true
               }
 
-            if Master Authorized Networks is enabled.
+            if Control Plane Authorized Networks is enabled.
 
-            If Master Authorized Networks is disabled, the
+            If Control Plane Authorized Networks is disabled, the
             above command will return null ( { } ).
         scored: false
 
       - id: 5.6.4
         text: "Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled (Manual)"
-        type: "manual"
         remediation: |
           Using Command Line:
             Create a cluster with a Private Endpoint enabled and Public Access disabled by including
@@ -422,7 +383,6 @@ groups:
 
       - id: 5.6.5
         text: "Ensure clusters are created with Private Nodes (Manual)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To create a cluster with Private Nodes enabled, include the --enable-private-nodes flag
@@ -437,7 +397,6 @@ groups:
 
       - id: 5.6.6
         text: "Consider firewalling GKE worker nodes (Manual)"
-        type: "manual"
         remediation: |
           Using Command Line:
             Use the following command to generate firewall rules, setting the variables as appropriate.
@@ -459,7 +418,6 @@ groups:
 
       - id: 5.6.7
         text: "Ensure Network Policy is Enabled and set as appropriate (Manual)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To enable Network Policy for an existing cluster, firstly enable the Network Policy add-on:
@@ -477,7 +435,6 @@ groups:
 
       - id: 5.6.8
         text: "Ensure use of Google-managed SSL Certificates (Manual)"
-        type: "manual"
         remediation: |
           If services of type:LoadBalancer are discovered, consider replacing the Service with an
           Ingress.
@@ -490,36 +447,25 @@ groups:
     text: "Logging"
     checks:
       - id: 5.7.1
-        text: "Ensure Stackdriver Kubernetes Logging and Monitoring is Enabled (Automated)"
-        type: "manual"
+        text: "Ensure Logging and Cloud Monitoring is Enabled (Automated)"
         remediation: |
           Using Command Line:
 
-            STACKDRIVER KUBERNETES ENGINE MONITORING SUPPORT (PREFERRED):
-            To enable Stackdriver Kubernetes Engine Monitoring for an existing cluster, run the
+            To enable Logging for an existing cluster, run the
             following command:
 
               gcloud container clusters update [CLUSTER_NAME] \
                 --zone [COMPUTE_ZONE] \
-                --enable-stackdriver-kubernetes
+                --logging [COMPONENTS_TO_BE_LOGGED]
 
-            LEGACY STACKDRIVER SUPPORT:
-            Both Logging and Monitoring support must be enabled.
-            To enable Legacy Stackdriver Logging for an existing cluster, run the following command:
+            To enable Cloud Monitoring for an existing cluster, run the following command:
 
               gcloud container clusters update [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
-                --logging-service logging.googleapis.com
-
-            To enable Legacy Stackdriver Monitoring for an existing cluster, run the following
-            command:
-
-              gcloud container clusters update [CLUSTER_NAME] --zone [COMPUTE_ZONE] \
-                --monitoring-service monitoring.googleapis.com
+                --monitoring [COMPONENTS_TO_BE_LOGGED]
         scored: false
 
       - id: 5.7.2
         text: "Enable Linux auditd logging (Manual)"
-        type: "manual"
         remediation: |
           Using Command Line:
             Download the example manifests:
@@ -541,20 +487,7 @@ groups:
     text: "Authentication and Authorization"
     checks:
       - id: 5.8.1
-        text: "Ensure Basic Authentication using static passwords is Disabled (Automated)"
-        type: "manual"
-        remediation: |
-          Using Command Line:
-            To update an existing cluster and disable Basic Authentication by removing the static
-            password:
-
-              gcloud container clusters update [CLUSTER_NAME] \
-                --no-enable-basic-auth
-        scored: false
-
-      - id: 5.8.2
         text: "Ensure authentication using Client Certificates is Disabled (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             Create a new cluster without a Client Certificate:
@@ -563,9 +496,8 @@ groups:
                 --no-issue-client-certificate
         scored: false
 
-      - id: 5.8.3
+      - id: 5.8.2
         text: "Manage Kubernetes RBAC users with Google Groups for GKE (Manual)"
-        type: "manual"
         remediation: |
           Using Command Line:
             Follow the G Suite Groups instructions at https://cloud.google.com/kubernetes-
@@ -573,16 +505,15 @@ groups:
 
             Then, create a cluster with
 
-              gcloud beta container clusters create my-cluster \
-                --security-group="gke-security-groups@[yourdomain.com]"
+              gcloud container clusters create [CLUSTER_NAME] \
+                --security-group=[SECURITY_GROUP_NAME]
 
             Finally create Roles, ClusterRoles, RoleBindings, and ClusterRoleBindings that
             reference your G Suite Groups.
         scored: false
 
-      - id: 5.8.4
+      - id: 5.8.3
         text: "Ensure Legacy Authorization (ABAC) is Disabled (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To disable Legacy Authorization for an existing cluster, run the following command:
@@ -596,15 +527,21 @@ groups:
     text: "Storage"
     checks:
       - id: 5.9.1
-        text: "Enable Customer-Managed Encryption Keys (CMEK) for GKE Persistent Disks (PD) (Manual)"
-        type: "manual"
+        text: "Enable Customer-Managed Encryption Keys (CMEK) for GKE Persistent Disks (PD) (Automated)"
+        remediation: |
+          This cannot be remediated by updating an existing cluster. The node pool must either
+          be recreated or a new cluster created.
+          scored: false
+
+      - id: 5.9.2
+        text: "Enable Customer-Managed Encryption Keys (CMEK) for Boot Disks (PD) (Automated)"
         remediation: |
           Using Command Line:
             FOR NODE BOOT DISKS:
             Create a new node pool using customer-managed encryption keys for the node boot disk, of
             [DISK_TYPE] either pd-standard or pd-ssd :
 
-              gcloud beta container node-pools create [CLUSTER_NAME] \
+              gcloud container node-pools create [CLUSTER_NAME] \
                 --disk-type [DISK_TYPE] \
                 --boot-disk-kms-key \
                 projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]
@@ -627,7 +564,6 @@ groups:
     checks:
       - id: 5.10.1
         text: "Ensure Kubernetes Web UI is Disabled (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To disable the Kubernetes Dashboard on an existing cluster, run the following command:
@@ -639,7 +575,6 @@ groups:
 
       - id: 5.10.2
         text: "Ensure that Alpha clusters are not used for production workloads (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             Upon creating a new cluster
@@ -651,20 +586,7 @@ groups:
         scored: false
 
       - id: 5.10.3
-        text: "Ensure Pod Security Policy is Enabled and set as appropriate (Manual)"
-        type: "manual"
-        remediation: |
-          Using Command Line:
-            To enable Pod Security Policy for an existing cluster, run the following command:
-
-              gcloud beta container clusters update [CLUSTER_NAME] \
-                --zone [COMPUTE_ZONE] \
-                --enable-pod-security-policy
-        scored: false
-
-      - id: 5.10.4
         text: "Consider GKE Sandbox for running untrusted workloads (Manual)"
-        type: "manual"
         remediation: |
           Using Command Line:
             To enable GKE Sandbox on an existing cluster, a new Node pool must be created.
@@ -676,16 +598,15 @@ groups:
                 --sandbox type=gvisor
         scored: false
 
-      - id: 5.10.5
+      - id: 5.10.4
         text: "Ensure use of Binary Authorization (Automated)"
-        type: "manual"
         remediation: |
           Using Command Line:
             Firstly, update the cluster to enable Binary Authorization:
 
               gcloud container cluster update [CLUSTER_NAME] \
                 --zone [COMPUTE-ZONE] \
-                --enable-binauthz
+                --binauthz-evaluation-mode=[EVALUATION_MODE]
 
             Create a Binary Authorization Policy using the Binary Authorization Policy Reference
             (https://cloud.google.com/binary-authorization/docs/policy-yaml-reference) for
@@ -696,11 +617,9 @@ groups:
               gcloud container binauthz policy import [YAML_POLICY]
         scored: false
 
-      - id: 5.10.6
-        text: "Enable Cloud Security Command Center (Cloud SCC) (Manual)"
-        type: "manual"
+      - id: 5.10.5
+        text: "Enable Security Posture (Manual)"
         remediation: |
-          Using Command Line:
-            Follow the instructions at https://cloud.google.com/security-command-
-            center/docs/quickstart-scc-setup.
+          Enable security posture via the UI, gCloud or API.
+          https://cloud.google.com/kubernetes-engine/docs/how-to/protect-workload-configuration
         scored: false
