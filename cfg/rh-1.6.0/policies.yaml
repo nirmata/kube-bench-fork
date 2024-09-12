@@ -1,6 +1,6 @@
 ---
 controls:
-version: "rh-1.5.0"
+version: "rh-1.6.0"
 id: 5
 text: "Kubernetes Policies"
 type: "policies"

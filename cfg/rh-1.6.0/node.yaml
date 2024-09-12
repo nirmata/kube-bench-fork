@@ -1,6 +1,6 @@
 ---
 controls:
-version: "rh-1.5.0"
+version: "rh-1.6.0"
 id: 4
 text: "Worker Node Security Configuration"
 type: "node"
@@ -227,8 +227,8 @@ groups:
         scored: true
 
       - id: 4.2.3
-        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Manual)"
-        type: manual
+        text: "Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)"
+        type: automated
         # Takes a lot of time for connection to fail and
         audit: |
           POD=$(oc -n openshift-kube-apiserver get pod -l app=openshift-kube-apiserver -o jsonpath='{.items[0].metadata.name}')
