@@ -204,4 +204,3 @@ groups:
         remediation: |
           Refer to the 'Managing users or IAM roles for your cluster' in Amazon EKS documentation.
         scored: false
-
