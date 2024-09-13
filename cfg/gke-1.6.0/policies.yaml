@@ -153,7 +153,6 @@ groups:
     checks:
       - id: 4.5.1
         text: "Configure Image Provenance using ImagePolicyWebhook admission controller (Automated)"
-        
         remediation: |
           Follow the Kubernetes documentation and setup image provenance.
           See also Recommendation 6.10.5 for GKE specifically.
@@ -164,7 +163,6 @@ groups:
     checks:
       - id: 4.6.1
         text: "Create administrative boundaries between resources using namespaces (Automated)"
-        
         remediation: |
           Follow the documentation and create namespaces for objects in your deployment as you need
           them.

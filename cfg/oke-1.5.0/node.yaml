@@ -233,8 +233,8 @@ groups:
             - flag: --tls-private-key-file
               path: '{.tlsPrivateKeyFile}'
         remediation: |
-          If	modifying	the	Kubelet	service	config file, edit the	kubelet.service	file	
-          /etc/kubernetes/kubelet-config.json and	set	the	below	parameter
+          If modifying the Kubelet service config file, edit the kubelet.service file
+          /etc/kubernetes/kubelet-config.json and set the below	parameter
           Verify that the `tls-cert-file=/var/lib/kubelet/pki/tls.pem`.
           Verify that the `tls-private-key-file=/var/lib/kubelet/pki/tls.key`.
           Based	on	your	system,	restart	the	kubelet service	and	check	status
@@ -259,7 +259,7 @@ groups:
               set: false
           bin_op: or
         remediation: |
-          If	modifying	the	Kubelet	service	config	file,	edit	the	kubelet.service	file	
+          If modifying the Kubelet service config file,	edit the kubelet.service file
           /etc/kubernetes/kubelet-config.json and	set	the	below	parameter
           Verify that the `--rotate-certificates` is present.
           Based on your system, restart the kubelet service. For example,
@@ -284,8 +284,8 @@ groups:
               set: false
           bin_op: or
         remediation: |
-          If	modifying	the	Kubelet	service	config	file,	edit	the	kubelet.service	file	
-          /etc/kubernetes/kubelet-config.json and	set	the	below	parameter
+          If modifying the Kubelet service config file,	edit the kubelet.service file
+          /etc/kubernetes/kubelet-config.json and set the below	parameter
           --rotate-server-certificates=true
           Based	on	your	system,	restart	the	kubelet service	and	check	status
           systemctl daemon-reload
