@@ -291,6 +291,7 @@ version_mapping:
   "ocp-3.10": "rh-0.7"
   "ocp-3.11": "rh-0.7"
   "ocp-4.0": "rh-1.0"
+  "ocp-4.7": "rh-1.6.0"
   "aks-1.0": "aks-1.0"
   "aks-1.5.0": "aks-1.5.0"
   "ack-1.0": "ack-1.0"
@@ -428,6 +429,12 @@ target_mapping:
     - "policies"
     - "managedservices"
   "rh-1.0":
+    - "master"
+    - "node"
+    - "controlplane"
+    - "policies"
+    - "etcd"
+  "rh-1.6.0":
     - "master"
     - "node"
     - "controlplane"
